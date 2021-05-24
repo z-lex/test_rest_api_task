@@ -43,8 +43,10 @@ class Car(db.Model):
     """
     Class represents particular vehicle
     """
-    id = db.Column(db.Integer, primary_key=True)
-    car_model_id = db.Column(db.Integer, db.ForeignKey('car_model.id'), nullable=False)
+    # primary key: serial id + model id
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    car_model_id = db.Column(db.Integer, db.ForeignKey('car_model.id'), nullable=False, primary_key=True)
+
     manufacture_date = db.Column(db.DateTime, nullable=True)
     kilometrage = db.Column(db.Float, nullable=True)
     dealer_center_id = db.Column(db.Integer, db.ForeignKey('dealer_center.id'), nullable=False)

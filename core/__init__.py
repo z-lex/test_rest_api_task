@@ -10,7 +10,7 @@ def db_create():
     :param app: flask application
     """
     from .models_cars import Car, CarBody, CarBrand, CarModel
-    from .models_dealers import Dealer, DealerCenter, Contacts
+    from .models_dealers import Dealer, DealerCenter
     db.drop_all()
     db.create_all()
     db.session.commit()
@@ -23,7 +23,7 @@ def db_create_and_populate():
     :return:
     """
     from .models_cars import Car, CarBody, CarBrand, CarModel
-    from .models_dealers import Dealer, DealerCenter, Contacts
+    from .models_dealers import Dealer, DealerCenter
     db.drop_all()
     db.create_all()
 
@@ -52,17 +52,14 @@ def db_create_and_populate():
     ]
     db.session.add_all(dealers)
 
-    contacts = [
-        Contacts(id=1, email='audi@audi-vitebskiy.ru',
-                 phone='+7 (812) 210-7696',
-                 country='Russia', city='Saint-Petersburg',
-                 city_address='17 Vitebskiy ave., Saint-Petersburg, Russia, 196105'),
-    ]
     dealer_centers = [
         DealerCenter(id=1, name='Audi Center Vitebskiy',
-                     dealer_id=1, contacts_id=1),
+                     dealer_id=1,
+                     email='audi@audi-vitebskiy.ru',
+                     phone='+7 (812) 210-7696',
+                     country='Russia', city='Saint-Petersburg',
+                     city_address='17 Vitebskiy ave., Saint-Petersburg, Russia, 196105'),
     ]
-    db.session.add_all(contacts)
     db.session.add_all(dealer_centers)
 
     # cars list

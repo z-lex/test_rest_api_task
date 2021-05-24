@@ -3,6 +3,10 @@ from core import db
 from http import HTTPStatus
 from core.models_cars import Car, CarBody, CarBrand, CarModel
 from core.models_dealers import Dealer, DealerCenter # for foreign key processing
+import json
+import decimal
+import datetime
+
 
 api = Namespace('cars')
 
@@ -220,4 +224,75 @@ class RouteCarModel(Resource):
         db.session.delete(car_model_to_delete)
         db.session.commit()
         return HTTPStatus.OK
+
+
+search_cars = api.model('SearchCars', {
+    'id': fields.Integer(required=False),
+    'car_model_id': fields.Integer(required=False),
+    'kilometrage_min': fields.Float(required=False),
+    'kilometrage_max': fields.Float(required=False),
+    'dealer_center_id': fields.Integer(required=False),
+    'price_min': fields.Integer(required=False),
+    'price_max': fields.Integer(required=False),
+    'horsepower_min': fields.Integer(required=False),
+    'horsepower_max': fields.Integer(required=False),
+    'brand_id': fields.Integer(required=False),
+    'city': fields.String(required=False),
+})
+
+
+def alchemyencoder(obj):
+    """JSON encoder function for SQLAlchemy special classes."""
+    if isinstance(obj, datetime.date):
+        return obj.isoformat()
+    elif isinstance(obj, decimal.Decimal):
+        return float(obj)
+
+
+@api.route('/search')
+class RouteCar(Resource):
+    @api.doc('search_cars')
+    @api.expect(search_cars)
+    def post(self):
+        """Search with parameters"""
+        data = api.payload
+        if isinstance(data, list):
+            data = data[0]
+
+        query = 'SELECT * FROM car, car_brand, car_model, car_body, ' \
+                'dealer_center WHERE '
+        if 'id' in data.keys():
+            query += '(car.id = ' + str(data['id']) + ') AND '
+        if 'car_model_id' in data.keys():
+            query += '(car.car_model_id = ' + str(data['car_model_id']) + ') AND '
+        if 'dealer_center_id' in data.keys():
+            query += '(car.dealer_center_id = ' + str(data['dealer_center_id']) + ') AND '
+        if 'city' in data.keys():
+            query += '(dealer_center.city = \'' + str(data['city']) + '\') AND '
+        if 'kilometrage_min' in data.keys():
+            query += '(car.kilometrage > ' + data['kilometrage_min'] + ') AND '
+        if 'kilometrage_max' in data.keys():
+            query += '(car.kilometrage < ' + data['kilometrage_max'] + ') AND '
+        if 'price_min' in data.keys():
+            query += '(car.price > ' + str(data['price_min']) + ') AND '
+        if 'price_max' in data.keys():
+            query += '(car.price < ' + str(data['price_max']) + ') AND '
+        if 'horsepower_min' in data.keys():
+            query += '(car_model.horsepower > ' + str(data['horsepower_min']) + ') AND '
+        if 'horsepower_max' in data.keys():
+            query += '(car_model.horsepower < ' + str(data['horsepower_max']) + ') AND '
+        if 'brand_id' in data.keys():
+            query += '(car_model.car_brand_id = ' + str(data['brand_id']) + ') AND '
+
+        query += '(car.car_model_id = car_model.id) AND ' \
+                 '(car_model.car_brand_id = car_brand.id) AND ' \
+                 '(car_model.car_body_id = car_body.id) AND ' \
+                 '(car.dealer_center_id = dealer_center.id)'
+
+        result = db.session.execute(query)
+        res = json.dumps([dict(r) for r in result], default=alchemyencoder)
+        if len(res) > 0:
+            return res, HTTPStatus.OK
+
+        return HTTPStatus.NO_CONTENT
 
