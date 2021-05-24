@@ -1,4 +1,5 @@
 from . import db
+# from .models_cars import Car
 
 
 class Dealer(db.Model):
@@ -7,7 +8,7 @@ class Dealer(db.Model):
     description = db.Column(db.Text, nullable=True)
 
     # one dealer can have multiple distribution centers
-    centers = db.relationship('DealerCenter', backref='dealer')
+    centers = db.relationship('DealerCenter', cascade='delete,all', backref='dealer')
 
 
 class DealerCenter(db.Model):
@@ -18,7 +19,7 @@ class DealerCenter(db.Model):
     description = db.Column(db.Text, nullable=True)
 
     # multiple cars belong to a particular dealing center
-    cars = db.relationship('Car', backref='dealer_center')
+    cars = db.relationship('Car', cascade='delete,all', backref='dealer_center')
 
 
 class Contacts(db.Model):

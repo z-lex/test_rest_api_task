@@ -1,0 +1,12 @@
+[
+  {
+    "car_body_id": "1",
+    "car_brand_id": "2",
+    "name": "Test Car Model",
+    "model_year": "2021",
+    "horsepower": "200",
+    "engine_size": "2000",
+    "engine_type": "Electro",
+    "description": "This car model doesn't exist"
+  }
+]

@@ -18,3 +18,15 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
+
+def get_config(config_name):
+    """
+    get config class by its name string
+    :param config_name:
+    :return: config class
+    """
+    configs = {
+        'development': DevelopmentConfig,
+        'testing': TestingConfig,
+    }
+    return configs.get(config_name, DevelopmentConfig)
